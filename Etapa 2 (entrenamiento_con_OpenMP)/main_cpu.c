@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <omp.h> // Necesario para el multihilo y medir el tiempo
-
-// Declaración de la función de carga de datos (definida en dataset.c)
-void load_dataset(const char* data_file, const char* labels_file, float** data, int** labels, int samples);
+#include <omp.h>
 
 #define INPUT_DIM 4096   
 #define HIDDEN_DIM 256   
@@ -15,10 +12,25 @@ void load_dataset(const char* data_file, const char* labels_file, float** data, 
 #define VALID_SAMPLES 75
 #define TEST_SAMPLES 75
 
+// Declaración de funciones externas (de dataset.c)
+void load_dataset(const char* data_file, const char* labels_file, float** data, int** labels, int samples);
+
 typedef struct {
     float* w1; 
     float* w2; 
 } NeuralNetworkCPU;
+
+// Prototipos de funciones para evitar errores de compilador
+void initialize_network_cpu(NeuralNetworkCPU* net);
+void train_network_cpu(NeuralNetworkCPU* net, float* train_data, int* train_labels, int samples, int epochs);
+float evaluate_network_cpu(NeuralNetworkCPU* net, float* data, int* labels, int samples);
+void free_network_cpu(NeuralNetworkCPU* net);
+void save_network(NeuralNetworkCPU* net, const char* filename);
+void save_predictions_csv(NeuralNetworkCPU* net, float* test_data, int* test_labels, int samples, const char* filename);
+
+// ==========================================
+// DEFINICIONES DE FUNCIONES
+// ==========================================
 
 void initialize_network_cpu(NeuralNetworkCPU* net) {
     int w1_size = INPUT_DIM * HIDDEN_DIM;
@@ -48,7 +60,6 @@ void train_network_cpu(NeuralNetworkCPU* net, float* train_data, int* train_labe
     float* losses = (float*)malloc(samples * sizeof(float));
 
     for (int epoch = 0; epoch < epochs; epoch++) {
-
         // 1. FORWARD PASS
         #pragma omp parallel for collapse(2) schedule(static)
         for (int r = 0; r < samples; r++) {
@@ -93,7 +104,7 @@ void train_network_cpu(NeuralNetworkCPU* net, float* train_data, int* train_labe
             }
         }
 
-        // Cálculo paralelo de LOSS y ACCURACY de entrenamiento por época
+        // Cálculo paralelo de LOSS y ACCURACY
         float total_loss = 0.0f;
         int correct_count = 0;
 
@@ -106,7 +117,6 @@ void train_network_cpu(NeuralNetworkCPU* net, float* train_data, int* train_labe
             losses[i] = -logf(prob);
             total_loss += losses[i];
 
-            // Calcular Predicción (ArgMax) para obtener el Accuracy instantáneo
             int row_offset = i * OUTPUT_DIM;
             float max_prob = output_layer[row_offset];
             int predicted_label = 0;
@@ -121,7 +131,7 @@ void train_network_cpu(NeuralNetworkCPU* net, float* train_data, int* train_labe
             }
         }
 
-        // Imprimir métricas detalladas para CADA ÉPOCA
+        // Imprimir métricas
         float avg_loss = total_loss / samples;
         float train_acc = ((float)correct_count / samples) * 100.0f;
         printf("  [CPU] Epoca %d/%d -> Loss: %.4f | Accuracy: %.2f%%\n", epoch + 1, epochs, avg_loss, train_acc);
@@ -191,13 +201,11 @@ void train_network_cpu(NeuralNetworkCPU* net, float* train_data, int* train_labe
     free(hidden_error); free(losses);
 }
 
-// Evalúa la red en CPU y calcula el % de Accuracy (Para bloques de Validación y Test)
 float evaluate_network_cpu(NeuralNetworkCPU* net, float* data, int* labels, int samples) {
     float* hidden_layer = (float*)malloc(samples * HIDDEN_DIM * sizeof(float));
     float* output_layer = (float*)malloc(samples * OUTPUT_DIM * sizeof(float));
     int correct_predictions = 0;
 
-    // 1. Capa Oculta (Forward Pass)
     #pragma omp parallel for collapse(2) schedule(static)
     for (int r = 0; r < samples; r++) {
         for (int c = 0; c < HIDDEN_DIM; c++) {
@@ -209,7 +217,6 @@ float evaluate_network_cpu(NeuralNetworkCPU* net, float* data, int* labels, int 
         }
     }
 
-    // 2. Capa de Salida (Forward Pass)
     #pragma omp parallel for collapse(2) schedule(static)
     for (int r = 0; r < samples; r++) {
         for (int c = 0; c < OUTPUT_DIM; c++) {
@@ -221,7 +228,6 @@ float evaluate_network_cpu(NeuralNetworkCPU* net, float* data, int* labels, int 
         }
     }
 
-    // 3. Calcular la predicción más alta (ArgMax) y comparar con la etiqueta real
     for (int r = 0; r < samples; r++) {
         int row_offset = r * OUTPUT_DIM;
         float max_val = output_layer[row_offset];
@@ -233,16 +239,79 @@ float evaluate_network_cpu(NeuralNetworkCPU* net, float* data, int* labels, int 
                 predicted_label = c;
             }
         }
-
         if (predicted_label == labels[r]) {
             correct_predictions++;
         }
     }
 
-    free(hidden_layer);
-    free(output_layer);
-
+    free(hidden_layer); free(output_layer);
     return ((float)correct_predictions / samples) * 100.0f;
+}
+
+// -----------------------------------------------------------
+// NUEVA FUNCIÓN: Guarda las predicciones de prueba en un CSV
+// -----------------------------------------------------------
+void save_predictions_csv(NeuralNetworkCPU* net, float* test_data, int* test_labels, int samples, const char* filename) {
+    float* hidden_layer = (float*)malloc(samples * HIDDEN_DIM * sizeof(float));
+    float* output_layer = (float*)malloc(samples * OUTPUT_DIM * sizeof(float));
+
+    // Forward pass para calcular resultados
+    #pragma omp parallel for collapse(2) schedule(static)
+    for (int r = 0; r < samples; r++) {
+        for (int c = 0; c < HIDDEN_DIM; c++) {
+            float sum = 0.0f;
+            for (int i = 0; i < INPUT_DIM; i++) {
+                sum += test_data[r * INPUT_DIM + i] * net->w1[i * HIDDEN_DIM + c];
+            }
+            hidden_layer[r * HIDDEN_DIM + c] = sum > 0.0f ? sum : 0.0f; 
+        }
+    }
+
+    #pragma omp parallel for collapse(2) schedule(static)
+    for (int r = 0; r < samples; r++) {
+        for (int c = 0; c < OUTPUT_DIM; c++) {
+            float sum = 0.0f;
+            for (int i = 0; i < HIDDEN_DIM; i++) {
+                sum += hidden_layer[r * HIDDEN_DIM + i] * net->w2[i * OUTPUT_DIM + c];
+            }
+            output_layer[r * OUTPUT_DIM + c] = sum;
+        }
+    }
+
+    // Escribir a archivo (Secuencial, no OpenMP)
+    FILE* f = fopen(filename, "w");
+    if (f) {
+        fprintf(f, "TrueLabel,PredictedLabel\n"); // Cabecera del CSV
+        for (int r = 0; r < samples; r++) {
+            int row_offset = r * OUTPUT_DIM;
+            float max_val = output_layer[row_offset];
+            int predicted_label = 0;
+
+            for (int c = 1; c < OUTPUT_DIM; c++) {
+                if (output_layer[row_offset + c] > max_val) {
+                    max_val = output_layer[row_offset + c];
+                    predicted_label = c;
+                }
+            }
+            fprintf(f, "%d,%d\n", test_labels[r], predicted_label);
+        }
+        fclose(f);
+        printf("[INFO] Predicciones guardadas en '%s'.\n", filename);
+    } else {
+        printf("[ERROR] No se pudo crear el archivo %s\n", filename);
+    }
+
+    free(hidden_layer); free(output_layer);
+}
+
+void save_network(NeuralNetworkCPU* net, const char* filename) {
+    FILE* f = fopen(filename, "wb");
+    if (f) {
+        fwrite(net->w1, sizeof(float), INPUT_DIM * HIDDEN_DIM, f);
+        fwrite(net->w2, sizeof(float), HIDDEN_DIM * OUTPUT_DIM, f);
+        fclose(f);
+        printf("[INFO] Modelo guardado en '%s' con exito.\n", filename);
+    }
 }
 
 void free_network_cpu(NeuralNetworkCPU* net) {
@@ -258,7 +327,7 @@ int main() {
     float* valid_data; int* valid_labels;
     float* test_data;  int* test_labels;
 
-    printf("Cargando dataset completo para CPU...\n");
+    printf("Cargando dataset...\n");
     load_dataset("train.bin", "train_labels.bin", &train_data, &train_labels, TRAIN_SAMPLES);
     load_dataset("valid.bin", "valid_labels.bin", &valid_data, &valid_labels, VALID_SAMPLES);
     load_dataset("test.bin", "test_labels.bin", &test_data, &test_labels, TEST_SAMPLES);
@@ -266,30 +335,25 @@ int main() {
     NeuralNetworkCPU net;
     initialize_network_cpu(&net);
 
-    // --- INICIO DEL CRONÓMETRO ---
     double start_time = omp_get_wtime();
-
     train_network_cpu(&net, train_data, train_labels, TRAIN_SAMPLES, 500);
-
-    // --- FIN DEL CRONÓMETRO ---
     double end_time = omp_get_wtime();
     double total_time = end_time - start_time;
 
-    // --- EVALUACIÓN DE MÉTRICAS FINALES ---
     float train_final_acc = evaluate_network_cpu(&net, train_data, train_labels, TRAIN_SAMPLES);
     float valid_acc = evaluate_network_cpu(&net, valid_data, valid_labels, VALID_SAMPLES);
     float test_acc = evaluate_network_cpu(&net, test_data, test_labels, TEST_SAMPLES);
 
-    printf("\n--- Resultados Finales (CPU OpenMP) ---\n");
+    printf("\n--- Resultados Finales ---\n");
     printf("Training Accuracy:   %.2f%%\n", train_final_acc);
     printf("Validation Accuracy: %.2f%%\n", valid_acc);
     printf("Test Accuracy:       %.2f%%\n", test_acc);
+    printf("Tiempo Total:        %.4f segundos\n\n", total_time);
 
-    printf("\n========================================\n");
-    printf(" TIEMPO TOTAL EN CPU (OpenMP): %.4f segundos\n", total_time);
-    printf("========================================\n\n");
+    // Guardar pesos y exportar CSV de predicciones
+    save_network(&net, "modelo_entrenado.bin"); 
+    save_predictions_csv(&net, test_data, test_labels, TEST_SAMPLES, "predicciones_test.csv");
 
-    // Limpieza de memoria
     free_network_cpu(&net);
     free(train_data); free(train_labels);
     free(valid_data); free(valid_labels);
