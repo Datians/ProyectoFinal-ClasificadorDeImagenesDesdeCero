@@ -232,6 +232,7 @@ Esta estrategia permite reducir significativamente el tiempo de entrenamiento en
 ![Budget creado en Billing](Evidencias/Grafico_Speedup.png)
 
 ## Conclusiones
+
 ### Preguntas de reflexion (Etapa 1)
 
 ### 1. ¿Por qué este preprocesamiento es “vergonzosamente paralelo”? Den una analogía.

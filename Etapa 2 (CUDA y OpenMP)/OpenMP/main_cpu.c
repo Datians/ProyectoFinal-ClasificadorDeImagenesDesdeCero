@@ -8,9 +8,9 @@
 #define OUTPUT_DIM 10    
 #define LEARNING_RATE 0.01f
 
-#define TRAIN_SAMPLES 350
-#define VALID_SAMPLES 75
-#define TEST_SAMPLES 75
+#define TRAIN_SAMPLES 490
+#define VALID_SAMPLES 105
+#define TEST_SAMPLES 105
 
 // Declaración de funciones externas (de dataset.c)
 void load_dataset(const char* data_file, const char* labels_file, float** data, int** labels, int samples);
