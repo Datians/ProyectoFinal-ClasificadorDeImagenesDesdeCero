@@ -5,7 +5,7 @@
 
 #define INPUT_DIM 4096   
 #define HIDDEN_DIM 256   
-#define OUTPUT_DIM 10    
+#define OUTPUT_DIM 2   
 #define LEARNING_RATE 0.01f
 
 #define TRAIN_SAMPLES 490
