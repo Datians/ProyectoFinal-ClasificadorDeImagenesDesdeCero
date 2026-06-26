@@ -204,15 +204,7 @@ if uploaded_file is not None:
 
     if len(flat_data) == 4096:
         st.markdown("---")
-        st.markdown(
-            """
-            <div class="ready-card">
-                <b>Listo para clasificar.</b><br>
-                La entrada ya fue preparada con la misma lógica funcional del código original.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+
 
         if st.button("🚀 Clasificar con la GPU (CUDA)", type="primary", use_container_width=True):
             with st.spinner("Procesando en los Tensor Cores / CUDA Cores..."):
