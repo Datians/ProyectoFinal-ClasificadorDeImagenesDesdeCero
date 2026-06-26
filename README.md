@@ -385,3 +385,29 @@ Cuando el volumen de información es pequeño, el tiempo requerido para copiar d
 En cambio, al aumentar el tamaño del conjunto de datos o el número de operaciones matemáticas, la GPU puede distribuir el trabajo entre miles de hilos ejecutándose en paralelo. De esta manera, el costo inicial de transferencia y lanzamiento de kernels se amortiza rápidamente, obteniéndose una aceleración considerable respecto a la CPU.
 
 En este proyecto, aunque el conjunto de datos contiene **700 imágenes de 64 × 64 píxeles**, el beneficio de la GPU comienza a evidenciarse especialmente durante las operaciones repetitivas del entrenamiento, como las multiplicaciones de matrices y el cálculo de gradientes a lo largo de múltiples épocas. En problemas de mayor escala, con decenas de miles o millones de imágenes, la diferencia de rendimiento entre CPU y GPU sería aún más significativa.
+
+# Evidencias Streamlit (Etapa 3)
+
+## Predicción correcta
+
+En la primera prueba se utilizó una imagen de una persona usando mascarilla. La aplicación realizó el procesamiento de la imagen, la convirtió a escala de grises, la redimensionó a 64x64 píxeles y generó el vector de 4096 características requerido por la red neuronal. Posteriormente, el modelo realizó la inferencia y clasificó correctamente la imagen como una persona con mascarilla.
+
+![Predicción correcta en Streamlit](Evidencias/FuncionamientoAppOK.png)
+
+Este resultado evidencia que la aplicación es capaz de recibir una imagen, procesarla y ejecutar el modelo entrenado para obtener una clasificación coherente con la entrada proporcionada.
+
+## Predicción incorrecta
+
+En la segunda prueba se utilizó una imagen de una persona sin mascarilla. Sin embargo, el modelo clasificó la imagen como una persona con mascarilla, lo cual representa una predicción incorrecta.
+
+![Predicción incorrecta en Streamlit](Evidencias/FuncionamientoAppError.png)
+
+Este caso demuestra que, aunque la aplicación funciona correctamente desde el punto de vista técnico, el modelo todavía puede presentar errores de clasificación. Esto puede deberse a la pérdida de información durante el preprocesamiento, la reducción de la imagen a 64x64 píxeles, las condiciones visuales de la imagen, el contraste, la iluminación, el fondo o la capacidad limitada del modelo para generalizar ante imágenes diferentes a las utilizadas durante el entrenamiento.
+
+## Análisis de la predicción incorrecta
+
+La predicción incorrecta puede explicarse por varios factores relacionados con el entrenamiento y la inferencia del modelo. En primer lugar, al convertir la imagen a escala de grises y redimensionarla a 64x64 píxeles, se pierde información visual importante, especialmente detalles finos del rostro. Además, si el conjunto de entrenamiento no contiene suficiente variedad de rostros, iluminación, fondos y posiciones, el modelo puede aprender patrones poco generalizables.
+
+También es posible que ciertas características del rostro, el contraste de la imagen o el fondo hayan generado una activación similar a la de imágenes con mascarilla. Esto demuestra que, aunque el modelo logra realizar inferencias funcionales, todavía puede presentar errores en casos donde la imagen de entrada difiere de las condiciones más frecuentes del conjunto de entrenamiento.
+
+Esta evidencia permite concluir que la aplicación Streamlit funciona correctamente como interfaz de prueba, pero también muestra que el rendimiento del modelo depende directamente de la calidad del dataset, la coherencia del preprocesamiento y la correcta correspondencia entre la arquitectura de la red y los pesos entrenados.
