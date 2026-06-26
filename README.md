@@ -84,7 +84,7 @@ Por lo tanto, cada imagen produce un vector de entrada de:
 |------|--------|------------|
 | Entrada | 4096 neuronas | — |
 | Oculta | 256 neuronas | ReLU |
-| Salida | 10 neuronas | Softmax |
+| Salida | 2 neuronas | Softmax |
 
 ---
 
