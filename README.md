@@ -18,6 +18,23 @@
 
 ## Proyecto y dataset
 
+### Metodología de Captura y Composición del Dataset
+
+Para garantizar la robustez y capacidad de generalización del modelo, se ha diseñado un dataset diverso y equilibrado, compuesto por los siguientes parámetros:
+
+* **Participantes:** Se contó con el uso de aproximadamente **250 personas** externas, además de los integrantes del equipo de desarrollo, con el fin de enriquecer la variabilidad del conjunto de datos.
+* **Volumen de datos:** El dataset cuenta con **350 imágenes por clase** (con y sin mascarilla), asegurando un balance equitativo para el entrenamiento.
+* **Preprocesamiento y Limpieza:** 
+    * Se utilizó **OpenCV** para la detección y recorte automático de los rostros en las imágenes capturadas.
+    * Debido a que el detector de OpenCV presentaba limitaciones al identificar rostros con cubrebocas, se realizó un proceso adicional de **recorte manual** para asegurar la calidad y precisión de los datos en dichas muestras.
+* **Variabilidad morfológica y accesorios:** Se incluyeron perfiles con distintas características físicas, tales como:
+    * Variedad en la longitud del cabello (corto y largo).
+    * Uso de accesorios como gafas, contemplando tanto usuarios que las portan como quienes no.
+* **Condiciones ambientales y de captura:** Para evitar el sobreajuste (*overfitting*) a entornos específicos, se manipularon las variables de captura de la siguiente manera:
+    * **Iluminación:** Se contemplaron escenarios con luz natural y artificial, variando ángulos de incidencia e intensidades, incluyendo condiciones de baja luminosidad.
+    * **Ángulos y perspectiva:** Se capturaron tomas en planos frontales, de perfil e inclinaciones ligeras de la cabeza, así como diferentes distancias focales (planos cercanos y lejanos).
+    * **Entorno:** Se utilizaron diversos fondos para asegurar que el modelo aprenda a identificar las características faciales independientemente del contexto.
+
 ## Arquitectura de la red
 Se implementó una red neuronal completamente conectada (Fully Connected Neural Network) utilizando CUDA para acelerar el entrenamiento y la inferencia sobre GPU.
 
@@ -159,6 +176,7 @@ Las métricas de evaluación consideradas son:
 ### Precisión (Precision) - GPU
 
 ![AccuracyGPU](Evidencias/AccuracyCUDA.png)
+![Time](Evidencias/Timelapse.png)
 
 ---
 
@@ -245,7 +263,7 @@ Para evaluar la eficiencia del entrenamiento, se comparó la implementación par
 | Arquitectura | Tiempo de Entrenamiento (s) | Speedup (vs. CPU) |
 | :--- | :---: | :---: |
 | **CPU (8 Hilos)** | 955.6160 s | 1.00x |
-| **GPU (RTX 3050)** | **2.0000 s** | **477.81x** |
+| **GPU (RTX 3050)** | 2.0000 s | 477.81x |
 
 #### Análisis de Resultados
 * **Eficiencia:** La transición de un entorno de procesamiento multihilo en CPU a una arquitectura de procesamiento masivo en GPU permitió una reducción drástica del tiempo de entrenamiento.
@@ -306,7 +324,7 @@ Por ello, aunque se utilicen 8 hilos, el speedup obtenido es de aproximadamente 
 
 ![Budget creado en Billing](Evidencias/Flujo.png)
 
-# Preguntas de Reflexión (Etapa 2)
+# Preguntas de Reflexión
 
 ## 1. ¿Por qué la multiplicación de matrices es ideal para la GPU? ¿Cuántos hilos lanzan y qué calcula cada uno?
 
