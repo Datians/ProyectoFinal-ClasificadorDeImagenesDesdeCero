@@ -7,7 +7,7 @@
 // Definiciones de la arquitectura de la red
 #define INPUT_DIM 4096   // Tamaño de la entrada
 #define HIDDEN_DIM 256   // Neuronas en la capa oculta
-#define OUTPUT_DIM 10    // Clases de salida
+#define OUTPUT_DIM 2   // Clases de salida
 #define LEARNING_RATE 0.01f
 
 // ============================================================================
