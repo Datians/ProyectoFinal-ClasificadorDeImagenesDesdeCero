@@ -295,3 +295,47 @@ Por ello, aunque se utilicen 8 hilos, el speedup obtenido es de aproximadamente 
 ### 3. Hagan un diagrama (Excalidraw) del flujo de una imagen desde foto cruda hasta vector de 4.096.
 
 ![Budget creado en Billing](Evidencias/Flujo.png)
+
+# Preguntas de Reflexión
+
+## 1. ¿Por qué la multiplicación de matrices es ideal para la GPU? ¿Cuántos hilos lanzan y qué calcula cada uno?
+
+La multiplicación de matrices es una operación altamente paralelizable, ya que el cálculo de cada elemento de la matriz resultado es independiente de los demás. Esto permite distribuir el trabajo entre miles de hilos de ejecución en la GPU, aprovechando su arquitectura masivamente paralela.
+
+En la implementación realizada en CUDA, se utiliza un kernel donde **cada hilo calcula un único elemento de la matriz de salida**. Para ello, el hilo obtiene su posición mediante los índices `(row, col)` y realiza el producto punto entre la fila correspondiente de la primera matriz y la columna correspondiente de la segunda.
+
+De forma general, cada hilo ejecuta la siguiente operación:
+
+```text
+C[i][j] = Σ A[i][k] × B[k][j]
+```
+
+Esta estrategia permite que miles de elementos de la matriz se calculen simultáneamente, reduciendo significativamente el tiempo de ejecución frente a una implementación secuencial en CPU.
+
+---
+
+## 2. Una capa densa es un matmul. Entonces, ¿qué estaba haciendo PyTorch por dentro en el corte anterior?
+
+Una capa densa (Fully Connected Layer) consiste fundamentalmente en una multiplicación de matrices seguida de la suma de un sesgo (bias) y la aplicación de una función de activación.
+
+Cuando anteriormente se utilizó PyTorch, estas operaciones eran ejecutadas automáticamente por la biblioteca sin necesidad de implementarlas manualmente. Internamente, PyTorch realiza operaciones equivalentes a:
+
+```python
+Salida = Activación(Entrada × Pesos + Bias)
+```
+
+Si el entrenamiento se ejecuta sobre una GPU, PyTorch delega estas operaciones a bibliotecas altamente optimizadas como **cuBLAS** para la multiplicación de matrices y **cuDNN** para otras operaciones relacionadas con redes neuronales.
+
+En este proyecto, dichas operaciones fueron implementadas manualmente mediante CUDA, permitiendo comprender con mayor detalle cómo se realiza la propagación hacia adelante (Forward Propagation), la retropropagación (Backpropagation) y la actualización de pesos directamente sobre la GPU.
+
+---
+
+## 3. ¿En qué punto el speedup CPU→GPU se nota más: con pocos datos o con muchos? ¿Por qué?
+
+La aceleración obtenida al utilizar una GPU se aprecia principalmente cuando se trabaja con grandes cantidades de datos o modelos de mayor tamaño.
+
+Cuando el volumen de información es pequeño, el tiempo requerido para copiar datos entre la memoria principal (CPU) y la memoria de la GPU, además del costo de lanzar los kernels, puede ser comparable o incluso superior al tiempo de realizar los cálculos directamente en la CPU. En estos casos, la diferencia de rendimiento suele ser reducida.
+
+En cambio, al aumentar el tamaño del conjunto de datos o el número de operaciones matemáticas, la GPU puede distribuir el trabajo entre miles de hilos ejecutándose en paralelo. De esta manera, el costo inicial de transferencia y lanzamiento de kernels se amortiza rápidamente, obteniéndose una aceleración considerable respecto a la CPU.
+
+En este proyecto, aunque el conjunto de datos contiene **700 imágenes de 64 × 64 píxeles**, el beneficio de la GPU comienza a evidenciarse especialmente durante las operaciones repetitivas del entrenamiento, como las multiplicaciones de matrices y el cálculo de gradientes a lo largo de múltiples épocas. En problemas de mayor escala, con decenas de miles o millones de imágenes, la diferencia de rendimiento entre CPU y GPU sería aún más significativa.
