@@ -324,7 +324,7 @@ Por ello, aunque se utilicen 8 hilos, el speedup obtenido es de aproximadamente 
 
 ![Budget creado en Billing](Evidencias/Flujo.png)
 
-# Preguntas de Reflexión
+# Preguntas de Reflexión (Etapa 2)
 
 ## 1. ¿Por qué la multiplicación de matrices es ideal para la GPU? ¿Cuántos hilos lanzan y qué calcula cada uno?
 
