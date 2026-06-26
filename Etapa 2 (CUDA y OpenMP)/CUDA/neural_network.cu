@@ -232,24 +232,6 @@ void train_network(NeuralNetwork* net, float* train_data, int* train_labels, int
     }
     fclose(f_historial);
 
-    FILE* f_metrics = fopen("metricas_finales.txt", "w");
-    if (f_metrics != NULL) {
-        fprintf(f_metrics, "real,predicho\n");
-        for (int i = 0; i < samples; i++) {
-            int highest_prob_class = 0;
-            float max_prob = h_output[i * OUTPUT_DIM];
-            for (int c = 1; c < OUTPUT_DIM; c++) {
-                if (h_output[i * OUTPUT_DIM + c] > max_prob) {
-                    max_prob = h_output[i * OUTPUT_DIM + c];
-                    highest_prob_class = c;
-                }
-            }
-            fprintf(f_metrics, "%d,%d\n", train_labels[i], highest_prob_class);
-        }
-        fclose(f_metrics);
-        printf("Métricas exportadas correctamente a archivos de texto.\n");
-    }
-
     cudaFree(d_batch_data); cudaFree(d_batch_labels);
     cudaFree(d_hidden_layer); cudaFree(d_output_layer);
     cudaFree(d_grad_w1); cudaFree(d_grad_w2);
@@ -276,6 +258,27 @@ float evaluate_network(NeuralNetwork* net, float* data, int* labels, int samples
 
     float* h_output = (float*)malloc(samples * OUTPUT_DIM * sizeof(float));
     cudaMemcpy(h_output, d_output, samples * OUTPUT_DIM * sizeof(float), cudaMemcpyDeviceToHost);
+
+    // --- MODIFICADO: Guarda en metricas_finales.txt el set que se esté evaluando (ej. Test) ---
+    if (samples > 1) {
+        FILE* f_metrics = fopen("metricas_finales.txt", "w");
+        if (f_metrics != NULL) {
+            fprintf(f_metrics, "real,predicho\n");
+            for (int i = 0; i < samples; i++) {
+                int highest_prob_class = 0;
+                float max_prob = h_output[i * OUTPUT_DIM];
+                for (int c = 1; c < OUTPUT_DIM; c++) {
+                    if (h_output[i * OUTPUT_DIM + c] > max_prob) {
+                        max_prob = h_output[i * OUTPUT_DIM + c];
+                        highest_prob_class = c;
+                    }
+                }
+                fprintf(f_metrics, "%d,%d\n", labels[i], highest_prob_class);
+            }
+            fclose(f_metrics);
+            printf("Métricas de evaluación exportadas correctamente a 'metricas_finales.txt'.\n");
+        }
+    }
 
     int correct_predictions = 0;
     for (int i = 0; i < samples; i++) {

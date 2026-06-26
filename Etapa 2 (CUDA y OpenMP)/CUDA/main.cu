@@ -4,9 +4,10 @@
 #include "dataset.cuh"
 #include "neural_network.cuh"
 
-#define TRAIN_SAMPLES 350
-#define VALID_SAMPLES 75
-#define TEST_SAMPLES 75
+// Reparto correcto para aprovechar las 700 imágenes totales (70% / 15% / 15%)
+#define TRAIN_SAMPLES 490
+#define VALID_SAMPLES 105
+#define TEST_SAMPLES 105
 
 int main(int argc, char* argv[])
 {
@@ -82,8 +83,12 @@ int main(int argc, char* argv[])
         // Guardamos el modelo recién entrenado para usos futuros
         save_network(&net, "modelo_red.bin");
 
+        // Evaluamos validación
         float valid_acc = evaluate_network(&net, valid_data, valid_labels, VALID_SAMPLES);
+        
+        // Evaluamos TEST AL FINAL para que sea este set el que sobrescriba 'metricas_finales.txt'
         float test_acc = evaluate_network(&net, test_data, test_labels, TEST_SAMPLES);
+        
         printf("\nValidation Accuracy: %.2f%%\n", valid_acc);
         printf("Test Accuracy: %.2f%%\n", test_acc);
     }
