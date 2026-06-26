@@ -19,8 +19,188 @@
 ## Proyecto y dataset
 
 ## Arquitectura de la red
+Se implementó una red neuronal completamente conectada (Fully Connected Neural Network) utilizando CUDA para acelerar el entrenamiento y la inferencia sobre GPU.
+
+La arquitectura está compuesta por tres capas principales:
+
+```
+Entrada (64x64 = 4096)
+        │
+        ▼
+Capa Oculta (256 neuronas)
+        │
+      ReLU
+        │
+        ▼
+Capa de Salida (10 neuronas)
+        │
+     Softmax
+        │
+        ▼
+Predicción Final
+```
+
+La red recibe imágenes de **64 × 64 píxeles**, las cuales son transformadas en un vector de **4096 características** antes de ser procesadas.
+
+Durante el entrenamiento se emplea:
+
+- Función de activación ReLU en la capa oculta.
+- Función Softmax en la capa de salida.
+- Descenso por gradiente (Gradient Descent).
+- Función de pérdida Cross-Entropy.
+- Implementación paralela mediante CUDA.
+
+---
+
+## 2. Capas, tamaños, activaciones y número total de parámetros entrenables
+
+### Configuración del conjunto de datos
+
+El modelo fue entrenado utilizando un conjunto de **700 imágenes** distribuidas de la siguiente forma:
+
+| Conjunto | Cantidad | Porcentaje |
+|----------|---------:|-----------:|
+| Entrenamiento | 490 | 70 % |
+| Validación | 105 | 15 % |
+| Prueba | 105 | 15 % |
+
+Todas las imágenes poseen una resolución de:
+
+```
+64 × 64 píxeles
+```
+
+Por lo tanto, cada imagen produce un vector de entrada de:
+
+```
+64 × 64 = 4096 características
+```
+
+---
+
+### Arquitectura del modelo
+
+| Capa | Tamaño | Activación |
+|------|--------|------------|
+| Entrada | 4096 neuronas | — |
+| Oculta | 256 neuronas | ReLU |
+| Salida | 10 neuronas | Softmax |
+
+---
+
+### Parámetros entrenables
+
+#### Capa Entrada → Oculta
+
+Número de pesos:
+
+```
+4096 × 256 = 1 048 576
+```
+
+#### Capa Oculta → Salida
+
+Número de pesos:
+
+```
+256 × 10 = 2 560
+```
+
+---
+
+### Total de parámetros entrenables
+
+| Conexión | Parámetros |
+|----------|-----------:|
+| Entrada → Oculta | 1 048 576 |
+| Oculta → Salida | 2 560 |
+| **Total** | **1 051 136** |
+
+> **Nota:** En esta implementación únicamente se entrenan las matrices de pesos (`W1` y `W2`). No se utilizan vectores de sesgo (bias), por lo que estos no forman parte de los parámetros entrenables.
+
+---
 
 ## Metricas finales
+Las métricas fueron calculadas utilizando el conjunto de prueba compuesto por **105 imágenes**, el cual no participó durante el entrenamiento del modelo.
+
+Las métricas de evaluación consideradas son:
+
+- Exactitud (Accuracy)
+- Precisión (Precision)
+- Recall
+- F1-Score
+- Matriz de Confusión
+
+---
+
+### Exactitud (Accuracy) y Loss (Perdida)
+
+![Accuracy](Evidencias/graficaRendimientoCUDA.png)
+
+---
+
+### Precisión (Precision)
+
+![Accuracy](Evidencias/AccuracyCUDA.png)
+
+---
+
+### Recall
+
+![Accuracy](Evidencias/recallCUDA.png)
+
+---
+
+### F1-Score y otras metricas
+
+![Accuracy](Evidencias/f1ScoreCUDA.png)
+
+---
+
+### Matriz de Confusión
+
+![Accuracy](Evidencias/matrizConfusionFinalCUDA.png)
+
+---
+
+## Resumen del Modelo
+
+| Característica | Valor |
+|---------------|-------|
+| Tipo de red | Red neuronal completamente conectada (MLP) |
+| Framework | CUDA C/C++ |
+| Resolución de entrada | 64 × 64 |
+| Tamaño de entrada | 4096 |
+| Neuronas ocultas | 256 |
+| Clases de salida | 10 |
+| Activación oculta | ReLU |
+| Activación salida | Softmax |
+| Función de pérdida | Cross-Entropy |
+| Tasa de aprendizaje | 0.01 |
+| Épocas de entrenamiento | 500 |
+| Dataset total | 700 imágenes |
+| Entrenamiento | 490 imágenes |
+| Validación | 105 imágenes |
+| Prueba | 105 imágenes |
+| Parámetros entrenables | 1 051 136 |
+
+---
+
+## Implementación
+
+La implementación fue desarrollada en CUDA, aprovechando el procesamiento paralelo de la GPU para acelerar las operaciones de propagación hacia adelante (Forward Propagation), retropropagación (Backpropagation) y actualización de pesos.
+
+Entre los kernels implementados se encuentran:
+
+- Multiplicación de matrices.
+- Función ReLU.
+- Función Softmax.
+- Cálculo de la pérdida Cross-Entropy.
+- Retropropagación del error.
+- Cálculo del gradiente.
+- Actualización de pesos.
+
+Esta estrategia permite reducir significativamente el tiempo de entrenamiento en comparación con una implementación secuencial ejecutada únicamente sobre CPU.
 
 ## Curvas de entrenamiento
 
