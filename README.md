@@ -136,12 +136,6 @@ Las métricas de evaluación consideradas son:
 
 ## Métricas de CPU
 
-### Exactitud (Accuracy) y Loss (Perdida) - CPU
-
-![AccuracyGraphsCPU](Evidencias/graficoRendimientoCPU.png)
-
----
-
 ### Precisión (Precision) - CPU
 
 ![AccuracyCPU](Evidencias/AccuracyCPU.png)
@@ -161,12 +155,6 @@ Las métricas de evaluación consideradas son:
 ---
 
 ## Métricas de GPU (CUDA)
-
-### Exactitud (Accuracy) y Loss (Perdida) - GPU
-
-![AccuracyGraphsGPU](Evidencias/graficaRendimientoCUDA.png)
-
----
 
 ### Precisión (Precision) - GPU
 
@@ -227,6 +215,18 @@ Esta estrategia permite reducir significativamente el tiempo de entrenamiento en
 
 ## Curvas de entrenamiento
 
+### Exactitud (Accuracy) y Loss (Perdida) - GPU
+
+![AccuracyGraphsGPU](Evidencias/graficaRendimientoCUDA.png)
+
+---
+
+### Exactitud (Accuracy) y Loss (Perdida) - CPU
+
+![AccuracyGraphsCPU](Evidencias/graficoRendimientoCPU.png)
+
+---
+
 ## Rendimiento paralelo
 ### Tabla de tiempos: Secuencial vs. OpenMP (Etapa 1)
 
@@ -240,6 +240,16 @@ Esta estrategia permite reducir significativamente el tiempo de entrenamiento en
 
 ### CPU vs GPU (Etapa 2) y Speedup
 
+Para evaluar la eficiencia del entrenamiento, se comparó la implementación paralela en CPU (OpenMP) frente a la implementación acelerada por hardware en GPU (CUDA).
+
+| Arquitectura | Tiempo de Entrenamiento (s) | Speedup (vs. CPU) |
+| :--- | :---: | :---: |
+| **CPU (8 Hilos)** | 955.6160 s | 1.00x |
+| **GPU (RTX 3050)** | **2.0000 s** | **477.81x** |
+
+#### Análisis de Resultados
+* **Eficiencia:** La transición de un entorno de procesamiento multihilo en CPU a una arquitectura de procesamiento masivo en GPU permitió una reducción drástica del tiempo de entrenamiento.
+* **Speedup obtenido:** Se logró una aceleración de **477.81x**. Este incremento exponencial en el rendimiento es característico de las operaciones matriciales de alta densidad (como el *forward* y *backward pass* de una red neuronal), las cuales están optimizadas para ejecutarse en miles de núcleos CUDA simultáneamente.
 
 
 ## Evidencias
@@ -296,7 +306,7 @@ Por ello, aunque se utilicen 8 hilos, el speedup obtenido es de aproximadamente 
 
 ![Budget creado en Billing](Evidencias/Flujo.png)
 
-# Preguntas de Reflexión
+# Preguntas de Reflexión (Etapa 2)
 
 ## 1. ¿Por qué la multiplicación de matrices es ideal para la GPU? ¿Cuántos hilos lanzan y qué calcula cada uno?
 
