@@ -1,16 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Definición de la función de carga de datos para el MLP
+
 void load_dataset(const char* data_file, const char* labels_file, float** data, int** labels, int samples) {
-    // Cada imagen/muestra tiene un tamaño fijo de 64x64 = 4096 píxeles (valores float)
     int pixels_per_sample = 4096; 
 
-    // 1. Reservar memoria dinámica en la RAM del Host
     *data = (float*)malloc(samples * pixels_per_sample * sizeof(float));
     *labels = (int*)malloc(samples * sizeof(int));
 
-    // Validar que la memoria se haya asignado correctamente
+   
     if (*data == NULL || *labels == NULL) {
         printf("[ERROR] No se pudo asignar memoria RAM para el dataset.\n");
         exit(1);
@@ -35,7 +33,6 @@ void load_dataset(const char* data_file, const char* labels_file, float** data, 
     FILE* f_labels = fopen(labels_file, "rb");
     if (!f_labels) {
         printf("[ERROR] No se pudo abrir el archivo de etiquetas: %s\n", labels_file);
-        // Liberamos la memoria del data que ya habiamos reservado para no dejar basura
         free(*data); 
         exit(1);
     }

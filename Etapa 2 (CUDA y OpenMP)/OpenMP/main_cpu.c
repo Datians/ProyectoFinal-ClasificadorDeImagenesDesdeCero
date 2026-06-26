@@ -28,9 +28,6 @@ void free_network_cpu(NeuralNetworkCPU* net);
 void save_network(NeuralNetworkCPU* net, const char* filename);
 void save_predictions_csv(NeuralNetworkCPU* net, float* test_data, int* test_labels, int samples, const char* filename);
 
-// ==========================================
-// DEFINICIONES DE FUNCIONES
-// ==========================================
 
 void initialize_network_cpu(NeuralNetworkCPU* net) {
     int w1_size = INPUT_DIM * HIDDEN_DIM;
@@ -248,9 +245,8 @@ float evaluate_network_cpu(NeuralNetworkCPU* net, float* data, int* labels, int 
     return ((float)correct_predictions / samples) * 100.0f;
 }
 
-// -----------------------------------------------------------
-// NUEVA FUNCIÓN: Guarda las predicciones de prueba en un CSV
-// -----------------------------------------------------------
+
+//  Guarda las predicciones de prueba en un CSV
 void save_predictions_csv(NeuralNetworkCPU* net, float* test_data, int* test_labels, int samples, const char* filename) {
     float* hidden_layer = (float*)malloc(samples * HIDDEN_DIM * sizeof(float));
     float* output_layer = (float*)malloc(samples * OUTPUT_DIM * sizeof(float));
@@ -278,7 +274,7 @@ void save_predictions_csv(NeuralNetworkCPU* net, float* test_data, int* test_lab
         }
     }
 
-    // Escribir a archivo (Secuencial, no OpenMP)
+    // Escribir a archivo 
     FILE* f = fopen(filename, "w");
     if (f) {
         fprintf(f, "TrueLabel,PredictedLabel\n"); // Cabecera del CSV
@@ -319,9 +315,6 @@ void free_network_cpu(NeuralNetworkCPU* net) {
     if (net->w2) free(net->w2);
 }
 
-// ==========================================
-// FUNCIÓN PRINCIPAL
-// ==========================================
 int main() {
     float* train_data; int* train_labels;
     float* valid_data; int* valid_labels;
