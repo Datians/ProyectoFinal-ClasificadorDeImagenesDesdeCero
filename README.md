@@ -135,7 +135,7 @@ Las métricas de evaluación consideradas son:
 
 ### Exactitud (Accuracy) y Loss (Perdida)
 
-![Accuracy](Evidencias/graficaRendimientoCUDA.png)
+![AccuracyGraphs](Evidencias/graficaRendimientoCUDA.png)
 
 ---
 
@@ -147,19 +147,19 @@ Las métricas de evaluación consideradas son:
 
 ### Recall
 
-![Accuracy](Evidencias/recallCUDA.png)
+![Recall](Evidencias/recallCUDA.png)
 
 ---
 
 ### F1-Score y otras metricas
 
-![Accuracy](Evidencias/f1ScoreCUDA.png)
+![F1Score](Evidencias/f1ScoreCUDA.png)
 
 ---
 
 ### Matriz de Confusión
 
-![Accuracy](Evidencias/matrizConfusionFinalCUDA.png)
+![Confusion](Evidencias/matrizConfusionFinalCUDA.png)
 
 ---
 
