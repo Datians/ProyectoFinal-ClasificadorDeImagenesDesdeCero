@@ -1,20 +1,20 @@
 # ClasificadorDeImagenesDesdeCero (Proyecto Mascarilla)
 
-> **Asignatura:** Fundamentos de Programación Concurrente y Distribuida  
-> **Docente:** Prf. Alejandro Jaimes  
-> **Fecha:** 26/06/2026  
+> **Asignatura:** Fundamentos de Programación Concurrente y Distribuida
+> **Docente:** Prf. Alejandro Jaimes
+> **Fecha:** 26/06/2026
 > **Repositorio:** [https://github.com/Datians/ProyectoFinal-ClasificadorDeImagenesDesdeCero]()
 
 ---
 
 ## Equipo
 
-| | Colaborador | GitHub |
-|---|---|---|
-| 👤 | Juan David Miranda Pelaez | [Gal4h4d](https://github.com/Gal4h4d) |
+|    | Colaborador                  | GitHub                                             |
+| -- | ---------------------------- | -------------------------------------------------- |
+| 👤 | Juan David Miranda Pelaez    | [Gal4h4d](https://github.com/Gal4h4d)                 |
 | 👤 | Cristhian David Parra Parada | [CristhianParada](https://github.com/CristhianParada) |
-| 👤 | Andres Cuadrado | [Datians](https://github.com/Datians) |
-| 👤 | Julio Martínez Triana | [Julsdev](https://github.com/JulssDev) |
+| 👤 | Andres Cuadrado              | [Datians](https://github.com/Datians)                 |
+| 👤 | Julio Martínez Triana       | [Julsdev](https://github.com/JulssDev)                |
 
 ## Proyecto y dataset
 
@@ -24,18 +24,19 @@ Para garantizar la robustez y capacidad de generalización del modelo, se ha dis
 
 * **Participantes:** Se contó con el uso de aproximadamente **250 personas** externas, además de los integrantes del equipo de desarrollo, con el fin de enriquecer la variabilidad del conjunto de datos.
 * **Volumen de datos:** El dataset cuenta con **350 imágenes por clase** (con y sin mascarilla), asegurando un balance equitativo para el entrenamiento.
-* **Preprocesamiento y Limpieza:** 
-    * Se utilizó **OpenCV** para la detección y recorte automático de los rostros en las imágenes capturadas.
-    * Debido a que el detector de OpenCV presentaba limitaciones al identificar rostros con cubrebocas, se realizó un proceso adicional de **recorte manual** para asegurar la calidad y precisión de los datos en dichas muestras.
+* **Preprocesamiento y Limpieza:**
+  * Se utilizó **OpenCV** para la detección y recorte automático de los rostros en las imágenes capturadas.
+  * Debido a que el detector de OpenCV presentaba limitaciones al identificar rostros con cubrebocas, se realizó un proceso adicional de **recorte manual** para asegurar la calidad y precisión de los datos en dichas muestras.
 * **Variabilidad morfológica y accesorios:** Se incluyeron perfiles con distintas características físicas, tales como:
-    * Variedad en la longitud del cabello (corto y largo).
-    * Uso de accesorios como gafas, contemplando tanto usuarios que las portan como quienes no.
+  * Variedad en la longitud del cabello (corto y largo).
+  * Uso de accesorios como gafas, contemplando tanto usuarios que las portan como quienes no.
 * **Condiciones ambientales y de captura:** Para evitar el sobreajuste (*overfitting*) a entornos específicos, se manipularon las variables de captura de la siguiente manera:
-    * **Iluminación:** Se contemplaron escenarios con luz natural y artificial, variando ángulos de incidencia e intensidades, incluyendo condiciones de baja luminosidad.
-    * **Ángulos y perspectiva:** Se capturaron tomas en planos frontales, de perfil e inclinaciones ligeras de la cabeza, así como diferentes distancias focales (planos cercanos y lejanos).
-    * **Entorno:** Se utilizaron diversos fondos para asegurar que el modelo aprenda a identificar las características faciales independientemente del contexto.
+  * **Iluminación:** Se contemplaron escenarios con luz natural y artificial, variando ángulos de incidencia e intensidades, incluyendo condiciones de baja luminosidad.
+  * **Ángulos y perspectiva:** Se capturaron tomas en planos frontales, de perfil e inclinaciones ligeras de la cabeza, así como diferentes distancias focales (planos cercanos y lejanos).
+  * **Entorno:** Se utilizaron diversos fondos para asegurar que el modelo aprenda a identificar las características faciales independientemente del contexto.
 
 ## Arquitectura de la red
+
 Se implementó una red neuronal completamente conectada (Fully Connected Neural Network) utilizando CUDA para acelerar el entrenamiento y la inferencia sobre GPU.
 
 La arquitectura está compuesta por tres capas principales:
@@ -75,11 +76,11 @@ Durante el entrenamiento se emplea:
 
 El modelo fue entrenado utilizando un conjunto de **700 imágenes** distribuidas de la siguiente forma:
 
-| Conjunto | Cantidad | Porcentaje |
-|----------|---------:|-----------:|
-| Entrenamiento | 490 | 70 % |
-| Validación | 105 | 15 % |
-| Prueba | 105 | 15 % |
+| Conjunto      | Cantidad | Porcentaje |
+| ------------- | -------: | ---------: |
+| Entrenamiento |      490 |       70 % |
+| Validación   |      105 |       15 % |
+| Prueba        |      105 |       15 % |
 
 Todas las imágenes poseen una resolución de:
 
@@ -97,11 +98,11 @@ Por lo tanto, cada imagen produce un vector de entrada de:
 
 ### Arquitectura del modelo
 
-| Capa | Tamaño | Activación |
-|------|--------|------------|
-| Entrada | 4096 neuronas | — |
-| Oculta | 256 neuronas | ReLU |
-| Salida | 2 neuronas | Softmax |
+| Capa    | Tamaño       | Activación |
+| ------- | ------------- | ----------- |
+| Entrada | 4096 neuronas | —          |
+| Oculta  | 256 neuronas  | ReLU        |
+| Salida  | 2 neuronas    | Softmax     |
 
 ---
 
@@ -127,11 +128,11 @@ Número de pesos:
 
 ### Total de parámetros entrenables
 
-| Conexión | Parámetros |
-|----------|-----------:|
-| Entrada → Oculta | 1 048 576 |
-| Oculta → Salida | 2 560 |
-| **Total** | **1 051 136** |
+| Conexión         |         Parámetros |
+| ----------------- | ------------------: |
+| Entrada → Oculta |           1 048 576 |
+| Oculta → Salida  |               2 560 |
+| **Total**   | **1 051 136** |
 
 > **Nota:** En esta implementación únicamente se entrenan las matrices de pesos (`W1` y `W2`). No se utilizan vectores de sesgo (bias), por lo que estos no forman parte de los parámetros entrenables.
 
@@ -194,24 +195,24 @@ Las métricas de evaluación consideradas son:
 
 ## Resumen del Modelo
 
-| Característica | Valor |
-|---------------|-------|
-| Tipo de red | Red neuronal completamente conectada (MLP) |
-| Framework | CUDA C/C++ |
-| Resolución de entrada | 64 × 64 |
-| Tamaño de entrada | 4096 |
-| Neuronas ocultas | 256 |
-| Clases de salida | 10 |
-| Activación oculta | ReLU |
-| Activación salida | Softmax |
-| Función de pérdida | Cross-Entropy |
-| Tasa de aprendizaje | 0.01 |
-| Épocas de entrenamiento | 500 |
-| Dataset total | 700 imágenes |
-| Entrenamiento | 490 imágenes |
-| Validación | 105 imágenes |
-| Prueba | 105 imágenes |
-| Parámetros entrenables | 1 051 136 |
+| Característica          | Valor                                      |
+| ------------------------ | ------------------------------------------ |
+| Tipo de red              | Red neuronal completamente conectada (MLP) |
+| Framework                | CUDA C/C++                                 |
+| Resolución de entrada   | 64 × 64                                   |
+| Tamaño de entrada       | 4096                                       |
+| Neuronas ocultas         | 256                                        |
+| Clases de salida         | 10                                         |
+| Activación oculta       | ReLU                                       |
+| Activación salida       | Softmax                                    |
+| Función de pérdida     | Cross-Entropy                              |
+| Tasa de aprendizaje      | 0.01                                       |
+| Épocas de entrenamiento | 500                                        |
+| Dataset total            | 700 imágenes                              |
+| Entrenamiento            | 490 imágenes                              |
+| Validación              | 105 imágenes                              |
+| Prueba                   | 105 imágenes                              |
+| Parámetros entrenables  | 1 051 136                                  |
 
 ---
 
@@ -246,43 +247,62 @@ Esta estrategia permite reducir significativamente el tiempo de entrenamiento en
 ---
 
 ## Rendimiento paralelo
+
 ### Tabla de tiempos: Secuencial vs. OpenMP (Etapa 1)
 
 | Hilos | Tiempo (s) | Speedup | X veces más rápido |
-| --- | --- | --- | --- |
-| 1 | 16,861 | 1 | 1.00× |
-| 2 | 7,43 | 2,26931 | 2.27× |
-| 4 | 7,381 | 2,28438 | 2.28× |
-| 6 | 7,237 | 2,32983 | 2.33× |
-| 8 | 6,633 | 2,54199 | 2.54× |
+| ----- | ---------- | ------- | -------------------- |
+| 1     | 16,861     | 1       | 1.00×               |
+| 2     | 7,43       | 2,26931 | 2.27×               |
+| 4     | 7,381      | 2,28438 | 2.28×               |
+| 6     | 7,237      | 2,32983 | 2.33×               |
+| 8     | 6,633      | 2,54199 | 2.54×               |
 
 ### CPU vs GPU (Etapa 2) y Speedup
 
 Para evaluar la eficiencia del entrenamiento, se comparó la implementación paralela en CPU (OpenMP) frente a la implementación acelerada por hardware en GPU (CUDA).
 
-| Arquitectura | Tiempo de Entrenamiento (s) | Speedup (vs. CPU) |
-| :--- | :---: | :---: |
-| **CPU (8 Hilos)** | 955.6160 s | 1.00x |
-| **GPU (RTX 3050)** | 2.0000 s | 477.81x |
+| Arquitectura             | Tiempo de Entrenamiento (s) | Speedup (vs. CPU) |
+| :----------------------- | :-------------------------: | :---------------: |
+| **CPU (8 Hilos)**  |         955.6160 s         |       1.00x       |
+| **GPU (RTX 3050)** |          2.0000 s          |      477.81x      |
 
 #### Análisis de Resultados
+
 * **Eficiencia:** La transición de un entorno de procesamiento multihilo en CPU a una arquitectura de procesamiento masivo en GPU permitió una reducción drástica del tiempo de entrenamiento.
 * **Speedup obtenido:** Se logró una aceleración de **477.81x**. Este incremento exponencial en el rendimiento es característico de las operaciones matriciales de alta densidad (como el *forward* y *backward pass* de una red neuronal), las cuales están optimizadas para ejecutarse en miles de núcleos CUDA simultáneamente.
 
-
 ## Evidencias
+
 ### Tiempos Secuencial vs Paralelo y Speedup
 
 ### Tiempos
+
 ![Budget creado en Billing](Evidencias/Tiempos.png)
 
-### Tabla Speedup 
+### Tabla Speedup
+
 ![Budget creado en Billing](Evidencias/Speedup.png)
 
 ### Grafica
+
 ![Budget creado en Billing](Evidencias/GraficoSpeedup.png)
 
 ## Conclusiones
+
+El proyecto permitió integrar de forma completa las tres etapas principales solicitadas: el preprocesamiento de imágenes con OpenMP, el entrenamiento e inferencia de una red neuronal implementada en CUDA y la construcción de una aplicación en Streamlit para probar el modelo de manera visual. Esto evidencia que el trabajo no se limitó únicamente al entrenamiento del modelo, sino que abordó todo el flujo de un sistema de clasificación de imágenes desde cero.
+
+En la Etapa 1 se comprobó que el preprocesamiento de imágenes es una tarea altamente paralelizable, ya que cada imagen puede procesarse de manera independiente. La implementación con OpenMP permitió distribuir el trabajo entre varios hilos y reducir el tiempo de ejecución frente a la versión secuencial. Sin embargo, los resultados también muestran que el speedup no crece de forma proporcional al número de hilos, debido a factores como la lectura de archivos, el acceso a memoria, la sobrecarga de administración de hilos y los límites de entrada/salida del sistema.
+
+En la Etapa 2 se evidenció la ventaja de utilizar GPU para operaciones intensivas en cálculo, especialmente en multiplicaciones de matrices, propagación hacia adelante, cálculo de gradientes y actualización de pesos. La implementación en CUDA permitió comprender de manera directa lo que normalmente realizan internamente bibliotecas de alto nivel como PyTorch, pero construyendo manualmente los kernels y el flujo de entrenamiento. Esto permitió reforzar el aprendizaje sobre programación paralela aplicada a redes neuronales.
+
+La comparación entre CPU y GPU demostró que la aceleración es especialmente significativa cuando existen muchas operaciones repetitivas y altamente paralelizables. Aunque el dataset del proyecto no es extremadamente grande, el entrenamiento durante múltiples épocas permitió observar una diferencia importante de rendimiento entre la versión CPU/OpenMP y la versión GPU/CUDA. En escenarios con datasets más grandes, este beneficio sería aún más evidente.
+
+La aplicación desarrollada en Streamlit permitió llevar el modelo entrenado a un entorno más práctico e interactivo, donde el usuario puede cargar una imagen o tomar una foto, aplicar el preprocesamiento correspondiente y obtener una predicción. Esta etapa fue importante porque permitió validar el funcionamiento del modelo fuera de la consola, acercando el proyecto a una aplicación real de usuario final.
+
+Durante el desarrollo también se identificó la importancia de mantener coherencia entre el preprocesamiento, la arquitectura de la red, los pesos entrenados y la aplicación de inferencia. Si alguno de estos elementos no coincide, el modelo puede generar resultados incorrectos o inconsistentes. Por esta razón, una de las principales lecciones del proyecto fue que el rendimiento no depende únicamente de usar paralelismo, sino también de conservar un flujo ordenado y consistente entre cada etapa.
+
+En general, el proyecto cumple con los objetivos propuestos porque integra programación en C, OpenMP, CUDA, procesamiento de imágenes, entrenamiento de una red neuronal, análisis de métricas, comparación de rendimiento y despliegue mediante Streamlit. Además, permitió comprender que la programación paralela no solo mejora los tiempos de ejecución, sino que también exige una correcta organización del código, manejo adecuado de memoria, validación de resultados y control de versiones del proyecto.
 
 ### Preguntas de reflexion (Etapa 1)
 
@@ -302,9 +322,7 @@ Cada hilo ejecuta todo el pipeline (escala de grises, resize, filtro Gaussiano, 
 Analogía:
 Es como tener una pila de 8.000 fotografías para editar y repartirlas entre varios estudiantes. Cada estudiante recibe un conjunto de fotos y les aplica exactamente los mismos filtros. Ninguno necesita esperar a los demás ni compartir resultados durante el trabajo, por lo que todos pueden trabajar simultáneamente.
 
-
 ### 2. Si tienen 8 hilos pero el speedup se queda en 2.54×, ¿qué lo limita?
-
 
 Aunque el procesamiento de imágenes es altamente paralelizable, los resultados muestran que al aumentar los hilos más allá de 2, la mejora es pequeña. Esto indica que el programa está limitado por factores distintos al número de hilos.
 
