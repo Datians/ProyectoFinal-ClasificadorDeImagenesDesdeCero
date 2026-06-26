@@ -10,9 +10,7 @@
 #define OUTPUT_DIM 2   // Clases de salida
 #define LEARNING_RATE 0.01f
 
-// ============================================================================
 // 1. KERNELS DE CUDA (Funciones que corren en la GPU)
-// ============================================================================
 
 __global__ void compute_loss_kernel(const float* output, const int* labels, float* losses, int samples, int output_dim) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -24,11 +22,17 @@ __global__ void compute_loss_kernel(const float* output, const int* labels, floa
     }
 }
 
-__global__ void init_weights_kernel(float* weights, int size, unsigned long seed) {
+__global__ void init_weights_kernel(float* weights, int size, float limit) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < size) {
-        float val = (float)(idx % 101) / 100.0f; 
-        weights[idx] = (val - 0.5f) * 0.1f;
+        // Generador pseudoaleatorio simple usando el índice para generar caos uniforme entre -limit y +limit
+        unsigned int x = idx + 12345;
+        x ^= x << 13;
+        x ^= x >> 17;
+        x ^= x << 5;
+        float rand_val = (float)(x % 10000) / 10000.0f; // Escala entre 0.0 y 1.0
+        
+        weights[idx] = -limit + 2.0f * limit * rand_val;
     }
 }
 
@@ -119,22 +123,25 @@ __global__ void update_weights_kernel(float* weights, const float* gradient, int
     }
 }
 
-// ============================================================================
 // 2. IMPLEMENTACIÓN DE LAS FUNCIONES DEL HOST (CPU)
-// ============================================================================
 
 void initialize_network(NeuralNetwork* net) {
-    printf("Inicializando red neuronal en la GPU...\n");
+    printf("Inicializando red neuronal en la GPU usando Xavier Initialization...\n");
     int w1_size = INPUT_DIM * HIDDEN_DIM;
     int w2_size = HIDDEN_DIM * OUTPUT_DIM;
 
     cudaMalloc((void**)&(net->d_w1), w1_size * sizeof(float));
     cudaMalloc((void**)&(net->d_w2), w2_size * sizeof(float));
 
+    float limit_w1 = sqrtf(6.0f / (INPUT_DIM + HIDDEN_DIM));
+    float limit_w2 = sqrtf(6.0f / (HIDDEN_DIM + OUTPUT_DIM));
+
     int blockSize = 256;
-    init_weights_kernel<<<(w1_size + blockSize - 1) / blockSize, blockSize>>>(net->d_w1, w1_size, 1234ULL);
-    init_weights_kernel<<<(w2_size + blockSize - 1) / blockSize, blockSize>>>(net->d_w2, w2_size, 5678ULL);
+    init_weights_kernel<<<(w1_size + blockSize - 1) / blockSize, blockSize>>>(net->d_w1, w1_size, limit_w1);
+    init_weights_kernel<<<(w2_size + blockSize - 1) / blockSize, blockSize>>>(net->d_w2, w2_size, limit_w2);
+    
     cudaDeviceSynchronize();
+    printf("Pesos inicializados correctamente para %d clases.\n", OUTPUT_DIM);
 }
 
 void train_network(NeuralNetwork* net, float* train_data, int* train_labels, int samples, int epochs) {
@@ -259,7 +266,6 @@ float evaluate_network(NeuralNetwork* net, float* data, int* labels, int samples
     float* h_output = (float*)malloc(samples * OUTPUT_DIM * sizeof(float));
     cudaMemcpy(h_output, d_output, samples * OUTPUT_DIM * sizeof(float), cudaMemcpyDeviceToHost);
 
-    // --- MODIFICADO: Guarda en metricas_finales.txt el set que se esté evaluando (ej. Test) ---
     if (samples > 1) {
         FILE* f_metrics = fopen("metricas_finales.txt", "w");
         if (f_metrics != NULL) {
@@ -305,6 +311,7 @@ float evaluate_network(NeuralNetwork* net, float* data, int* labels, int samples
             }
         }
         printf("\nPRED_CLASS: %d\n", final_pred); 
+        printf("PRED_CONF: %.4f\n", max_p); 
     }
 
     cudaFree(d_data); cudaFree(d_hidden); cudaFree(d_output);
@@ -319,9 +326,7 @@ void free_network(NeuralNetwork* net) {
     if (net->d_w2) cudaFree(net->d_w2);
 }
 
-// ============================================================================
 // 3. PERSISTENCIA: GUARDAR Y CARGAR EL MODELO BINARIO
-// ============================================================================
 
 int save_network(NeuralNetwork* net, const char* filename) {
     printf("Guardando pesos del modelo en archivo binario: %s...\n", filename);

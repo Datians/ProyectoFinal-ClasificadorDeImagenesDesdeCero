@@ -4,275 +4,137 @@ import numpy as np
 from PIL import Image
 import os
 
+# Configuración premium de la página
 st.set_page_config(
-    page_title="CUDA Mask Detector",
+    page_title="CUDA Face Mask Detector",
     page_icon="😷",
-    layout="centered"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-st.markdown(
-    """
+# Estilos CSS personalizados para pulir detalles visuales
+st.markdown("""
     <style>
-        .stApp {
-            background: radial-gradient(circle at top, #151b2b 0%, #0e1117 45%, #07090f 100%);
-            color: #f8fafc;
-        }
-
-        .hero-card {
-            padding: 1.8rem 1.6rem;
-            border-radius: 22px;
-            background: linear-gradient(135deg, rgba(59,130,246,0.16), rgba(15,23,42,0.88));
-            border: 1px solid rgba(148,163,184,0.22);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.38);
-            margin-bottom: 1.4rem;
-        }
-
-        .hero-title {
-            font-size: 2.45rem;
-            font-weight: 850;
-            margin-bottom: 0.25rem;
-        }
-
-        .hero-subtitle {
-            color: #cbd5e1;
-            font-size: 1.03rem;
-            line-height: 1.55;
-        }
-
-        .section-card {
-            padding: 1.1rem;
-            border-radius: 18px;
-            background: rgba(15,23,42,0.68);
-            border: 1px solid rgba(148,163,184,0.18);
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .ready-card {
-            padding: 1rem 1.1rem;
-            border-radius: 16px;
-            background: rgba(37,99,235,0.13);
-            border: 1px solid rgba(96,165,250,0.35);
-            color: #dbeafe;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .success-result {
-            padding: 1.25rem;
-            border-radius: 16px;
-            background: rgba(22,163,74,0.22);
-            border: 1px solid rgba(34,197,94,0.48);
-            color: #4ade80;
-            font-size: 1.35rem;
-            font-weight: 800;
-            margin-top: 0.8rem;
-        }
-
-        .error-result {
-            padding: 1.25rem;
-            border-radius: 16px;
-            background: rgba(220,38,38,0.22);
-            border: 1px solid rgba(248,113,113,0.48);
-            color: #f87171;
-            font-size: 1.35rem;
-            font-weight: 800;
-            margin-top: 0.8rem;
-        }
-
-        .warning-result {
-            padding: 1.15rem;
-            border-radius: 16px;
-            background: rgba(234,179,8,0.18);
-            border: 1px solid rgba(250,204,21,0.45);
-            color: #fde047;
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-top: 0.8rem;
-        }
-
-        div[data-testid="stFileUploader"] {
-            background: rgba(255,255,255,0.04);
-            border-radius: 16px;
-            padding: 0.8rem;
-            border: 1px dashed rgba(148,163,184,0.45);
-        }
-
-        div[data-testid="stMetric"] {
-            background: rgba(255,255,255,0.04);
-            padding: 0.75rem;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
+    .block-container { padding-top: 2rem; }
+    .stButton>button { width: 100%; border-radius: 8px; font-weight: bold; }
+    .metric-box {
+        background-color: #f0f2f6;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+    }
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
-st.markdown(
-    """
-    <div class="hero-card">
-        <div class="hero-title">🧠 Detector de Mascarillas</div>
-        <h3 style="margin-top: 0rem;">Acelerado por GPU CUDA</h3>
-        <p class="hero-subtitle">
-            Sube una imagen o toma una foto para clasificarla en tiempo real usando tu red neuronal en CUDA.
-            La imagen será convertida a escala de grises, redimensionada a 64x64 y enviada al modelo.
-        </p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# --- PANEL LATERAL TÉCNICO ---
+with st.sidebar:
+    st.markdown("## 🛠️ Especificaciones de Hardware")
+    st.info("⚡ **Back-end:** C++ / NVIDIA CUDA API\n\n⚙️ **Aceleración:** Cores de GPU dedicados")
+    st.markdown("---")
+    st.markdown("### 📊 Arquitectura de la Red")
+    st.markdown("- **Entrada:** 4096 Neuronas (64x64 px)\n- **Capa Oculta:** 256 Neuronas (ReLU)\n- **Capa Salida:** Softmax de 2 Clases")
 
-# Diccionario de clases (Ajusta el orden según tu dataset)
+# --- CUERPO PRINCIPAL ---
+st.title("🧠 Detector de Mascarillas Inteligente")
+st.caption("Clasificación binaria en tiempo real mediante procesamiento masivo en paralelo con GPU.")
+st.markdown("---")
+
 CLASES = {
     0: "🔓 SIN MASCARILLA",
     1: "😷 CON MASCARILLA"
 }
 
-with st.expander("ℹ️ Información del sistema"):
-    col_info_1, col_info_2 = st.columns(2)
-
-    with col_info_1:
-        st.metric("Entrada esperada", "4096 características")
-        st.metric("Tamaño procesado", "64x64")
-
-    with col_info_2:
-        if os.path.exists("./neural_net") or os.path.exists("./neural_net.exe"):
-            st.success("Ejecutable neural_net encontrado.")
-        else:
-            st.warning("No se detectó neural_net en la carpeta actual.")
-
-        if os.path.exists("modelo_red.bin"):
-            st.success("modelo_red.bin encontrado.")
-        else:
-            st.warning("No se detectó modelo_red.bin en la carpeta actual.")
-
-st.markdown("### 📸 Entrada de imagen")
-
-tab_upload, tab_camera = st.tabs(["📁 Subir imagen", "📷 Tomar foto"])
-
-with tab_upload:
-    uploaded_file = st.file_uploader(
-        "Elige una imagen o archivo binario",
-        type=["bin", "png", "jpg", "jpeg"]
-    )
-
-with tab_camera:
-    camera_file = st.camera_input("Toma una foto con la cámara")
-
-if camera_file is not None:
-    uploaded_file = camera_file
+# Subida del archivo ocupando toda la fila superior
+uploaded_file = st.file_uploader("📤 Arrastra o selecciona una imagen de prueba...", type=["bin", "png", "jpg", "jpeg"])
 
 if uploaded_file is not None:
+    # Crear dos columnas para visualización paralela
+    col1, col2 = st.columns([1, 1])
+    
     if uploaded_file.name.endswith(('png', 'jpg', 'jpeg')):
-        image = Image.open(uploaded_file).convert('L') # Escala de grises
-        image_resized = image.resize((64, 64)) # 64x64 = 4096
-
-        st.markdown("---")
-        st.subheader("🧪 Datos procesados")
-
-        col_img_1, col_img_2 = st.columns(2)
-
-        with col_img_1:
-            st.image(image, caption="Imagen original en escala de grises", width=300)
-
-        with col_img_2:
-            st.image(image_resized, caption="Imagen procesada para la Red (64x64)", width=220)
-
+        image_orig = Image.open(uploaded_file)
+        image_gray = image_orig.convert('L')
+        image_resized = image_gray.resize((64, 64))
+        
+        with col1:
+            st.markdown("##### 📸 Vista Original")
+            st.image(image_orig, use_container_width=True)
+            
+        with col2:
+            st.markdown("##### 📐 Entrada Redimensionada (64x64 Gray)")
+            st.image(image_resized, width=180, caption="Entrada real a la Red CUDA")
+            
         pixel_data = np.array(image_resized, dtype=np.float32) / 255.0
         flat_data = pixel_data.flatten()
-        tipo_entrada = "Imagen"
     else:
         bytes_data = uploaded_file.read()
         flat_data = np.frombuffer(bytes_data, dtype=np.float32)
-        tipo_entrada = "Archivo binario"
+        st.success(f"📦 Archivo binario cargado de forma directa. Elementos: {len(flat_data)}")
 
-        st.markdown("---")
-        st.subheader("🧪 Datos procesados")
-        st.success(f"Archivo binario cargado. Tamaño: {len(flat_data)} características.")
-
-    col_data_1, col_data_2, col_data_3 = st.columns(3)
-
-    with col_data_1:
-        st.metric("Tipo de entrada", tipo_entrada)
-
-    with col_data_2:
-        st.metric("Características", len(flat_data))
-
-    with col_data_3:
-        st.metric("Rango", f"{flat_data.min():.3f} - {flat_data.max():.3f}")
+    st.markdown("---")
 
     if len(flat_data) == 4096:
-        st.markdown("---")
-
-
-        if st.button("🚀 Clasificar con la GPU (CUDA)", type="primary", use_container_width=True):
-            with st.spinner("Procesando en los Tensor Cores / CUDA Cores..."):
+        # Botón destacado para disparar la ejecución
+        if st.button("🚀 CLASIFICAR IMAGEN CON LA GPU"):
+            with st.spinner("Ejecutando inferencia en memoria de video (VRAM)..."):
                 temp_filename = "temp_streamlit_sample.bin"
                 flat_data.tofile(temp_filename)
-
+                
                 try:
+                    # Ejecutar ejecutable de Windows sumando el .exe
+                    ejecutable = "./neural_net.exe" if os.name == 'nt' else "./neural_net"
                     result = subprocess.run(
-                        ["./neural_net", temp_filename],
-                        capture_output=True,
-                        text=True,
+                        [ejecutable, temp_filename], 
+                        capture_output=True, 
+                        text=True, 
                         check=True
                     )
-
+                    
                     output_console = result.stdout
-
-                    # Buscamos la línea mágica que imprimió CUDA
-                    prediccion_detectada = None
+                    
+                    # Parsing avanzado de la consola de CUDA
+                    clase_num = None
+                    confianza = 0.0
+                    
                     for line in output_console.split("\n"):
                         if "PRED_CLASS:" in line:
                             clase_num = int(line.split(":")[1].strip())
-                            prediccion_detectada = CLASES.get(clase_num, f"Clase desconocida ({clase_num})")
-
-                    # --- DISEÑO DEL RESULTADO EN LA INTERFAZ ---
-                    st.markdown("---")
-                    st.subheader("🎯 Resultado de la Clasificación:")
-
-                    if prediccion_detectada:
-                        if "CON MASCARILLA" in prediccion_detectada:
-                            st.markdown(
-                                f"""
-                                <div class="success-result">
-                                    Predicción: {prediccion_detectada}
-                                </div>
-                                """,
-                                unsafe_allow_html=True
-                            )
-                        else:
-                            st.markdown(
-                                f"""
-                                <div class="error-result">
-                                    Predicción: {prediccion_detectada}
-                                </div>
-                                """,
-                                unsafe_allow_html=True
-                            )
+                        if "PRED_CONF:" in line:
+                            confianza = float(line.split(":")[1].strip()) * 100.0
+                    
+                    # --- RENDERIZADO DEL PANEL DE RESULTADOS ---
+                    if clase_num is not None:
+                        prediccion_detectada = CLASES.get(clase_num, f"Clase {clase_num}")
+                        
+                        st.subheader("🎯 Diagnóstico del Modelo")
+                        
+                        # Layout dinámico en base al veredicto
+                        res_col1, res_col2 = st.columns([1.5, 2])
+                        
+                        with res_col1:
+                            if clase_num == 1:
+                                st.success(f"#### Veredicto:  \n**{prediccion_detectada}**")
+                            else:
+                                st.error(f"#### Veredicto:  \n**{prediccion_detectada}**")
+                        
+                        with res_col2:
+                            st.markdown(f"**Confianza de la Red:** `{confianza:.2f}%`")
+                            # Barra de progreso visual usando colores temáticos
+                            st.progress(min(max(confianza / 100.0, 0.0), 1.0))
+                            
+                        st.balloons()
                     else:
-                        st.markdown(
-                            """
-                            <div class="warning-result">
-                                Se ejecutó bien, pero no se detectó la etiqueta PRED_CLASS en el código C++.
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
-
-                    # Colapsable para ver la consola de CUDA (Modo desarrollador)
-                    with st.expander("🛠️ Ver logs técnicos de la GPU (Consola CUDA)"):
+                        st.warning("⚠️ Inferencia completada, pero no se capturaron las etiquetas de salida en los logs.")
+                    
+                    # Logs técnicos colapsados elegantemente
+                    with st.expander("🛠️ Ver métricas detalladas de los hilos de ejecución de la GPU"):
                         st.code(output_console)
-
-                    st.balloons()
-
+                        
                 except Exception as e:
-                    st.error(f"Hubo un error al ejecutar el código CUDA: {e}")
+                    st.error(f"❌ Error crítico al comunicar con los hilos de ejecución de CUDA: {e}")
                 finally:
                     if os.path.exists(temp_filename):
                         os.remove(temp_filename)
     else:
-        st.error(f"Error: La red espera 4096 características, recibidas {len(flat_data)}.")
-else:
-    st.info("Sube una imagen, carga un archivo .bin o toma una foto para comenzar.")
+        st.error(f"⚠️ Vector inválido: La topología de la red requiere una matriz plana de 4096 píxeles (Recibidos: {len(flat_data)}).")
