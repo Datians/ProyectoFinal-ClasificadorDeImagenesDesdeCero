@@ -229,7 +229,7 @@ Esta estrategia permite reducir significativamente el tiempo de entrenamiento en
 ![Budget creado en Billing](Evidencias/Speedup.png)
 
 ### Grafica
-![Budget creado en Billing](Evidencias/Grafico_Speedup.png)
+![Budget creado en Billing](Evidencias/GraficoSpeedup.png)
 
 ## Conclusiones
 
