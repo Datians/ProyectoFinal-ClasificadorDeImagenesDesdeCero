@@ -120,7 +120,8 @@ Número de pesos:
 
 ---
 
-## Metricas finales
+## Métricas finales
+
 Las métricas fueron calculadas utilizando el conjunto de prueba compuesto por **105 imágenes**, el cual no participó durante el entrenamiento del modelo.
 
 Las métricas de evaluación consideradas son:
@@ -133,33 +134,55 @@ Las métricas de evaluación consideradas son:
 
 ---
 
-### Exactitud (Accuracy) y Loss (Perdida)
+## Métricas de CPU
 
-![AccuracyGraphs](Evidencias/graficaRendimientoCUDA.png)
+### Exactitud (Accuracy) y Loss (Perdida) - CPU
 
----
-
-### Precisión (Precision)
-
-![Accuracy](Evidencias/AccuracyCUDA.png)
+![AccuracyGraphsCPU](Evidencias/graficoRendimientoCPU.png)
 
 ---
 
-### Recall
+### Precisión (Precision) - CPU
 
-![Recall](Evidencias/recallCUDA.png)
-
----
-
-### F1-Score y otras metricas
-
-![F1Score](Evidencias/f1ScoreCUDA.png)
+![AccuracyCPU](Evidencias/AccuracyCPU.png)
 
 ---
 
-### Matriz de Confusión
+### F1-Score y otras métricas - CPU
 
-![Confusion](Evidencias/matrizConfusionFinalCUDA.png)
+![F1ScoreCPU](Evidencias/metricasGlobalesCPU.png)
+
+---
+
+### Matriz de Confusión - CPU
+
+![ConfusionCPU](Evidencias/matrizConfusionCPU.png)
+
+---
+
+## Métricas de GPU (CUDA)
+
+### Exactitud (Accuracy) y Loss (Perdida) - GPU
+
+![AccuracyGraphsGPU](Evidencias/graficaRendimientoCUDA.png)
+
+---
+
+### Precisión (Precision) - GPU
+
+![AccuracyGPU](Evidencias/AccuracyCUDA.png)
+
+---
+
+### F1-Score y otras métricas - GPU
+
+![F1ScoreGPU](Evidencias/f1ScoreCUDA.png)
+
+---
+
+### Matriz de Confusión - GPU
+
+![ConfusionGPU](Evidencias/matrizConfusionFinalCUDA.png)
 
 ---
 
