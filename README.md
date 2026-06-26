@@ -52,6 +52,7 @@
 ![Budget creado en Billing](Evidencias/Grafico_Speedup.png)
 
 ## Conclusiones
+
 ### Preguntas de reflexion (Etapa 1)
 
 ### 1. ¿Por qué este preprocesamiento es “vergonzosamente paralelo”? Den una analogía.
