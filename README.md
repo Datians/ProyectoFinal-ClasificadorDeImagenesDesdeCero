@@ -171,6 +171,7 @@ Las métricas de evaluación consideradas son:
 ### Precisión (Precision) - GPU
 
 ![AccuracyGPU](Evidencias/AccuracyCUDA.png)
+![Time](Evidencias/Timelapse.png)
 
 ---
 
